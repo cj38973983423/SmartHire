@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartHire — AI 智能招聘助手</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --accent: #38bdf8;
+    --accent2: #818cf8;
+    --green: #4ade80;
+    --orange: #fb923c;
+    --red: #f87171;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --border: #334155;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .container { max-width: 1000px; margin: 0 auto; padding: 24px 20px; }
+
+  /* Hero */
+  .hero {
+    text-align: center;
+    padding: 64px 0 48px;
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 48px;
+  }
+  .hero h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 12px;
+  }
+  .hero p {
+    font-size: 1.2rem;
+    color: var(--muted);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .hero .badges { margin-top: 24px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .hero .badge {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .badge.python { border-color: #3776AB; color: #3776AB; }
+  .badge.react { border-color: #61DAFB; color: #61DAFB; }
+  .badge.fastapi { border-color: #009688; color: #009688; }
+  .badge.antd { border-color: #1677FF; color: #1677FF; }
+  .badge.llm { border-color: #a855f7; color: #a855f7; }
+  .badge.sqlite { border-color: #003B57; color: #41BDF5; }
+
+  /* Section */
+  section { margin-bottom: 56px; }
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 24px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--accent);
+    display: inline-block;
+  }
+
+  /* Feature Grid */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .feature-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .feature-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  }
+  .feature-card .icon { font-size: 2rem; margin-bottom: 8px; }
+  .feature-card h3 { font-size: 1rem; margin-bottom: 6px; }
+  .feature-card p { font-size: 0.85rem; color: var(--muted); }
+
+  /* Tech Stack */
+  .stack-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+  }
+  .stack-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .stack-item .label { font-size: 0.9rem; font-weight: 600; }
+  .stack-item .desc { font-size: 0.8rem; color: var(--muted); }
+
+  /* Architecture */
+  .arch-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    white-space: pre;
+    color: var(--muted);
+  }
+  .arch-box .hl { color: var(--accent); }
+  .arch-box .hl2 { color: var(--green); }
+  .arch-box .hl3 { color: var(--orange); }
+
+  /* Flow */
+  .flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 16px 0;
+  }
+  .flow-step {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 0.9rem;
+    text-align: center;
+  }
+  .flow-arrow { color: var(--accent); font-size: 1.2rem; }
+
+  /* API Table */
+  .api-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+  .api-table th, .api-table td {
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .api-table th { background: var(--card); font-weight: 600; color: var(--accent); }
+  .api-table td:first-child { font-family: monospace; font-weight: 600; }
+  .method { display: inline-block; padding: 1px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; }
+  .method.get { background: #1e3a5f; color: #60a5fa; }
+  .method.post { background: #14532d; color: #4ade80; }
+  .method.patch { background: #5b2e0d; color: #fb923c; }
+  .method.put { background: #5b2e0d; color: #fb923c; }
+  .method.delete { background: #450a0a; color: #f87171; }
+
+  /* Quick Start */
+  .code-block {
+    background: #0d1117;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    overflow-x: auto;
+    color: #c9d1d9;
+    margin: 12px 0;
+  }
+  .code-block .cmt { color: #8b949e; }
+  .code-block .kwd { color: #ff7b72; }
+  .code-block .str { color: #a5d6ff; }
+  .code-block .var { color: #d2a8ff; }
+
+  /* Links */
+  .links {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 24px;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #000;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(56,189,248,0.3); }
+  .btn-outline {
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .btn-outline:hover { border-color: var(--accent); }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 32px 0;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 2rem; }
+    .hero p { font-size: 1rem; }
+    .api-table { font-size: 0.75rem; }
+    .api-table th, .api-table td { padding: 6px 8px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>🤖 SmartHire</h1>
+  <p>AI 智能招聘助手 —— 基于大语言模型的简历初筛系统，<br>帮助 HR 从海量简历中快速锁定高匹配度候选人</p>
+  <div class="badges">
+    <span class="badge python">Python 3.11</span>
+    <span class="badge react">React 18</span>
+    <span class="badge fastapi">FastAPI</span>
+    <span class="badge antd">Ant Design 5</span>
+    <span class="badge llm">LLM-Powered</span>
+    <span class="badge sqlite">SQLite</span>
+  </div>
+  <div class="links">
+    <a href="https://github.com/cj38973983423/SmartHire" class="btn btn-primary" target="_blank">GitHub 仓库 →</a>
+    <a href="https://github.com/cj38973983423/SmartHire/blob/main/RESUME-PROJECT.md" class="btn btn-outline" target="_blank">📋 简历项目描述</a>
+    <a href="https://github.com/cj38973983423/SmartHire/blob/main/TUTORIAL.md" class="btn btn-outline" target="_blank">📖 零基础教程</a>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- 功能介绍 -->
+<section>
+  <h2 class="section-title">✨ 核心功能</h2>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="icon">📤</div>
+      <h3>批量上传简历</h3>
+      <p>支持 PDF/DOCX，多选文件或拖拽整个文件夹，上传即解析</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🤖</div>
+      <h3>AI 自动解析</h3>
+      <p>自动提取姓名、技能列表、工作年限、教育经历等结构化信息</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">📋</div>
+      <h3>JD 职位管理</h3>
+      <p>创建职位描述，定义技能要求、经验年限、学历门槛，启停控制</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🧠</div>
+      <h3>AI 四维度评分</h3>
+      <p>基于 JD 全文，从技能40% / 经验30% / 教育15% / 综合15% 综合打分</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">⭐</div>
+      <h3>待筛选区 (≥60分)</h3>
+      <p>高分候选人自动归类，按分数降序排列，优先查看</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🗑️</div>
+      <h3>淘汰库 (&lt;60分)</h3>
+      <p>低分候选人自动归入，HR 可人工复核、写备注</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">📊</div>
+      <h3>数据看板</h3>
+      <p>简历总数、各状态数量、平均评分，招聘进度一目了然</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">👨‍💼</div>
+      <h3>人工决策</h3>
+      <p>HR 标记通过 / 淘汰，支持添加备注，AI 辅助人工判断</p>
+    </div>
+  </div>
+</section>
+
+<!-- 技术栈 -->
+<section>
+  <h2 class="section-title">🛠 技术栈</h2>
+  <div class="stack-grid">
+    <div class="stack-item">
+      <div style="font-size:1.5rem">⚛️</div>
+      <div><div class="label">React 18 + TypeScript</div><div class="desc">前端框架 · 类型安全</div></div>
+    </div>
+    <div class="stack-item">
+      <div style="font-size:1.5rem">⚡</div>
+      <div><div class="label">Vite 5</div><div class="desc">构建工具 · 极速 HMR</div></div>
+    </div>
+    <div class="stack-item">
+      <div style="font-size:1.5rem">🎨</div>
+      <div><div class="label">Ant Design 5</div><div class="desc">UI 组件库 · 企业级质量</div></div>
+    </div>
+    <div class="stack-item">
+      <div style="font-size:1.5rem">🐍</div>
+      <div><div class="label">FastAPI + Python 3.11</div><div class="desc">异步高性能后端</div></div>
+    </div>
+    <div class="stack-item">
+      <div style="font-size:1.5rem">🗄️</div>
+      <div><div class="label">SQLAlchemy 2.0 + SQLite</div><div class="desc">ORM · 可切换 PostgreSQL</div></div>
+    </div>
+    <div class="stack-item">
+      <div style="font-size:1.5rem">🤖</div>
+      <div><div class="label">Hermes Agent (DeepSeek)</div><div class="desc">AI 引擎 · subprocess 调用</div></div>
+    </div>
+    <div class="stack-item">
+      <div style="font-size:1.5rem">📄</div>
+      <div><div class="label">PyPDF2 + python-docx</div><div class="desc">文档解析 · 零外部依赖</div></div>
+    </div>
+    <div class="stack-item">
+      <div style="font-size:1.5rem">🔄</div>
+      <div><div class="label">GitHub Actions</div><div class="desc">CI · 自动 lint + 构建</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 系统架构 -->
+<section>
+  <h2 class="section-title">🏗 系统架构</h2>
+  <div class="arch-box">┌──────────────────────────────────────────────────────────────────┐
+│                        用户浏览器                               │
+│       React 18 + TypeScript + Ant Design 5 + Vite 5            │
+│     ┌─────────┐  ┌───────────┐  ┌──────────┐  ┌────────────┐ │
+│     │ 数据看板  │  │  JD管理   │  │ 简历管理   │  │  批量上传   │ │
+│     └─────────┘  └───────────┘  └─────┬────┘  └────────────┘ │
+│                    ┌──────────────────▼──────────┐             │
+│                    │   Axios HTTP 客户端           │             │
+│                    └──────────────────┬──────────┘             │
+└───────────────────────────────────────┼───────────────────────┘
+                                        │
+                               HTTP REST API
+                            localhost:8000/api/*
+                                        │
+┌───────────────────────────────────────┼───────────────────────┐
+│                      FastAPI 后端     │                       │
+│  ┌────────────────────────────────────▼─────────────────┐    │
+│  │               FastAPI Application                     │    │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌────────────┐ │    │
+│  │  │ /api/resumes │  │  /api/jds    │  │/api/analyze│ │    │
+│  │  │ 简历 CRUD    │  │  JD CRUD     │  │ AI 评分    │ │    │
+│  │  └──────┬───────┘  └──────┬───────┘  └──────┬─────┘ │    │
+│  │         └────────┬────────┘─────────────────┘        │    │
+│  │                  ▼                                    │    │
+│  │  ┌────────────────────────────────────────┐           │    │
+│  │  │        SQLAlchemy ORM 2.0              │           │    │
+│  │  │  ┌──────────────────┐  ┌────────────┐  │           │    │
+│  │  │  │  job_descriptions│  │  resumes   │  │           │    │
+│  │  │  └──────────────────┘  └─────┬──────┘  │           │    │
+│  │  │  ┌───────────────────────────▼──────┐  │           │    │
+│  │  │  │     resume_scores                │  │           │    │
+│  │  │  │  (多对多: resume × jd)            │  │           │    │
+│  │  │  └──────────────────────────────────┘  │           │    │
+│  │  └────────────────────────────────────────┘           │    │
+│  │                        │                               │    │
+│  │         ┌──────────────▼──────────────┐                │    │
+│  │         │        SQLite                │                │    │
+│  │         └─────────────────────────────┘                │    │
+│  │                                                        │    │
+│  │         ┌──────────────────────────────┐               │    │
+│  │         │   Hermes Agent (subprocess)  │               │    │
+│  │         │   hermes chat -q "prompt"    │               │    │
+│  │         │   └→ JSON 响应              │               │    │
+│  │         └──────────────────────────────┘               │    │
+│  └────────────────────────────────────────────────────────┘    │
+└───────────────────────────────────────────────────────────────┘</div>
+</section>
+
+<!-- 评分流程 -->
+<section>
+  <h2 class="section-title">🎯 AI 评分流程</h2>
+  <div class="flow">
+    <span class="flow-step">📋 创建 JD</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">📤 上传简历</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">🤖 AI 解析</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">🧠 四维度评分</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step" style="border-color:var(--green);">⭐ ≥60 待筛选</span>
+    <span class="flow-arrow">or</span>
+    <span class="flow-step" style="border-color:var(--red);">🗑️ &lt;60 淘汰库</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-step">👨‍💼 HR 决策</span>
+  </div>
+
+  <div class="arch-box" style="margin-top:16px;font-size:0.85rem;line-height:1.8;">
+评分维度权重：
+  ┌─────────────────┬──────┬──────────────────────────┐
+  │ 维度            │ 权重  │ 说明                     │
+  ├─────────────────┼──────┼──────────────────────────┤
+  │ 技能匹配度       │ 40%  │ 候选人技能与 JD 的匹配度  │
+  │ 经验匹配度       │ 30%  │ 工作经验与要求契合度      │
+  │ 教育背景匹配度   │ 15%  │ 教育背景符合程度          │
+  │ 综合契合度       │ 15%  │ 整体素质与职位匹配度      │
+  └─────────────────┴──────┴──────────────────────────┘
+
+  <span class="hl">总分</span> = 技能 × 40% + 经验 × 30% + 教育 × 15% + 综合 × 15%</div>
+</section>
+
+<!-- API 接口 -->
+<section>
+  <h2 class="section-title">🔌 API 接口一览</h2>
+  <div style="overflow-x:auto;">
+    <table class="api-table">
+      <thead><tr><th>方法</th><th>路径</th><th>功能</th></tr></thead>
+      <tbody>
+        <tr><td><span class="method post">POST</span></td><td>/api/resumes</td><td>上传单份简历</td></tr>
+        <tr><td><span class="method post">POST</span></td><td>/api/resumes/batch</td><td>批量上传简历</td></tr>
+        <tr><td><span class="method get">GET</span></td><td>/api/resumes</td><td>简历列表（搜索/筛选/分页）</td></tr>
+        <tr><td><span class="method get">GET</span></td><td>/api/resumes/{id}</td><td>简历详情</td></tr>
+        <tr><td><span class="method patch">PATCH</span></td><td>/api/resumes/{id}/status</td><td>更新简历状态+备注</td></tr>
+        <tr><td><span class="method delete">DELETE</span></td><td>/api/resumes/{id}</td><td>删除简历</td></tr>
+        <tr><td><span class="method post">POST</span></td><td>/api/jds</td><td>创建 JD</td></tr>
+        <tr><td><span class="method get">GET</span></td><td>/api/jds</td><td>JD 列表</td></tr>
+        <tr><td><span class="method get">GET</span></td><td>/api/jds/{id}</td><td>JD 详情</td></tr>
+        <tr><td><span class="method put">PUT</span></td><td>/api/jds/{id}</td><td>更新 JD</td></tr>
+        <tr><td><span class="method delete">DELETE</span></td><td>/api/jds/{id}</td><td>删除 JD</td></tr>
+        <tr><td><span class="method post">POST</span></td><td>/api/analyze/score</td><td>AI 评分（单份）</td></tr>
+        <tr><td><span class="method post">POST</span></td><td>/api/analyze/score-batch</td><td>批量 AI 评分</td></tr>
+        <tr><td><span class="method get">GET</span></td><td>/api/analyze/scores/{id}</td><td>评分历史</td></tr>
+        <tr><td><span class="method get">GET</span></td><td>/api/health</td><td>健康检查</td></tr>
+        <tr><td><span class="method get">GET</span></td><td>/api/stats</td><td>仪表盘统计</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="color:var(--muted);font-size:0.8rem;margin-top:8px;">Swagger UI: http://localhost:8000/docs</p>
+</section>
+
+<!-- 快速开始 -->
+<section>
+  <h2 class="section-title">🚀 快速开始</h2>
+
+  <p style="margin-bottom:8px;color:var(--muted);font-size:0.9rem;">前提条件：Python 3.10+ / Node.js 18+ / <a href="https://hermes-agent.nousresearch.com" style="color:var(--accent);" target="_blank">Hermes Agent</a></p>
+
+  <div class="code-block">
+<span class="cmt"># 1. 克隆项目</span>
+<span class="kwd">git clone</span> https://github.com/cj38973983423/SmartHire.git
+<span class="kwd">cd</span> SmartHire
+
+<span class="cmt"># 2. 启动后端</span>
+<span class="kwd">cd</span> backend
+python3 -m <span class="var">venv</span> .venv
+<span class="kwd">source</span> .venv/bin/activate
+pip <span class="kwd">install</span> -r requirements.txt
+uvicorn app.main:app <span class="var">--reload</span> <span class="var">--port</span> 8000
+
+<span class="cmt"># 3. 新开终端，启动前端</span>
+<span class="kwd">cd</span> frontend
+npm <span class="kwd">install</span>
+npm <span class="kwd">run</span> dev
+
+<span class="cmt"># 4. 浏览器打开</span>
+<span class="str">http://localhost:5173</span></div>
+</section>
+
+<!-- 项目结构 -->
+<section>
+  <h2 class="section-title">📁 项目结构</h2>
+  <div class="arch-box" style="font-size:0.82rem;line-height:1.7;">SmartHire/
+├── <span class="hl">README.md</span>              # 项目说明
+├── <span class="hl">RESUME-PROJECT.md</span>      # 简历项目描述文档
+├── <span class="hl">TUTORIAL.md</span>            # 零基础教程
+├── <span class="hl">SmartHire-介绍.html</span>    # 👈 你正在看的这个页面
+├── <span class="hl2">.github/workflows/ci.yml</span>  # CI 自动构建
+│
+├── <span class="hl3">backend/</span>
+│   ├── requirements.txt
+│   └── app/
+│       ├── main.py              # FastAPI 入口
+│       ├── models.py            # 3 张 ORM 表
+│       ├── schemas.py           # 请求/响应模型
+│       ├── routers/             # 3 组路由 (16+ 接口)
+│       └── services/            # Hermes 集成 + 文件存储
+│
+├── <span class="hl3">frontend/</span>
+│   └── src/
+│       ├── api/index.ts         # Axios 客户端
+│       ├── App.tsx              # 路由 + 侧边栏
+│       └── pages/               # 6 个页面组件
+│
+├── <span class="hl3">docs/</span>                 # 架构文档
+└── <span class="hl3">uploads/</span>               # 简历文件存储</div>
+</section>
+
+</div>
+
+<div class="footer">
+  <p>📋 SmartHire · 基于 MIT 协议开源</p>
+  <p style="margin-top:4px;">
+    <a href="https://github.com/cj38973983423/SmartHire" style="color:var(--accent);text-decoration:none;" target="_blank">GitHub</a>
+    ·
+    <a href="https://github.com/cj38973983423/SmartHire/blob/main/RESUME-PROJECT.md" style="color:var(--accent);text-decoration:none;" target="_blank">简历项目描述</a>
+    ·
+    <a href="https://github.com/cj38973983423/SmartHire/blob/main/TUTORIAL.md" style="color:var(--accent);text-decoration:none;" target="_blank">零基础教程</a>
+  </p>
+</div>
+
+</body>
+</html>
