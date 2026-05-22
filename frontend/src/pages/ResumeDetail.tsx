@@ -2,13 +2,17 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Card, Descriptions, Tag, Button, Space, Spin, message,
-  Select, Input, Divider, Statistic, Row, Col, Modal,
+  Select, Input, Divider, Statistic, Row, Col, Modal, Table,
 } from 'antd';
 import {
   ArrowLeftOutlined, ThunderboltOutlined, DeleteOutlined,
 } from '@ant-design/icons';
-import { getResume, analyzeResume, updateResumeStatus, deleteResume } from '../api';
-import type { ResumeDetail } from '../api';
+import {
+  getResume, analyzeResume, updateResumeStatus, deleteResume,
+  getResumeScores, getJDs,
+} from '../api';
+import type { ResumeDetail, JDItem, ResumeScoreItem } from '../api';
+import type { ColumnsType } from 'antd/es/table';
 
 const statusMap: Record<string, { color: string; label: string }> = {
   pending: { color: 'orange', label: '待处理' },
@@ -23,8 +27,12 @@ export default function ResumeDetailPage() {
   const [resume, setResume] = useState<ResumeDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
+  const [selectedJD, setSelectedJD] = useState<number | undefined>(undefined);
+  const [jdList, setJdList] = useState<JDItem[]>([]);
   const [jobKeywords, setJobKeywords] = useState('');
   const [reviewNote, setReviewNote] = useState('');
+  const [scoreHistory, setScoreHistory] = useState<ResumeScoreItem[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
 
   const fetchResume = async () => {
     if (!id) return;
@@ -42,13 +50,25 @@ export default function ResumeDetailPage() {
 
   useEffect(() => { fetchResume(); }, [id]);
 
+  // 加载 JD 列表
+  useEffect(() => {
+    getJDs({ active_only: true, page_size: 100 })
+      .then((res) => setJdList(res.items))
+      .catch(() => {});
+  }, []);
+
   const handleAnalyze = async () => {
     if (!id || !resume) return;
     setAnalyzing(true);
     try {
       const keywords = jobKeywords.split(/[,，\s]+/).filter(Boolean);
-      const result = await analyzeResume(Number(id), keywords);
-      message.success(`评分完成：${result.score} 分`);
+      const result = await analyzeResume(
+        Number(id),
+        keywords,
+        selectedJD || undefined,
+      );
+      const mode = result.jd_title ? `基于「${result.jd_title}」` : '通用';
+      message.success(`${mode}评分完成：${result.score} 分`);
       fetchResume();
     } catch {
       message.error('AI 分析失败');
@@ -88,12 +108,34 @@ export default function ResumeDetailPage() {
     });
   };
 
+  const handleShowHistory = async () => {
+    if (!id) return;
+    try {
+      const scores = await getResumeScores(Number(id));
+      setScoreHistory(scores);
+      setShowHistory(true);
+    } catch {
+      message.error('加载评分历史失败');
+    }
+  };
+
   if (loading) return <Spin size="large" style={{ display: 'block', margin: '100px auto' }} />;
   if (!resume) return <div>简历不存在</div>;
 
   const skillsList: string[] = (() => {
     try { return JSON.parse(resume.skills || '[]'); } catch { return []; }
   })();
+
+  // 通过 score_reason 展示评分理由
+
+  const scoreColumns: ColumnsType<ResumeScoreItem> = [
+    { title: 'JD 职位', dataIndex: 'jd_title', key: 'jd_title', render: (v) => v || '通用评分' },
+    { title: '分数', dataIndex: 'score', key: 'score', width: 80,
+      render: (s) => <Tag color={s >= 80 ? 'green' : s >= 60 ? 'orange' : 'red'}>{s} 分</Tag> },
+    { title: '评分理由', dataIndex: 'score_reason', key: 'score_reason', ellipsis: true },
+    { title: '时间', dataIndex: 'created_at', key: 'created_at', width: 170,
+      render: (v) => new Date(v).toLocaleString('zh-CN') },
+  ];
 
   return (
     <div>
@@ -102,6 +144,7 @@ export default function ResumeDetailPage() {
         <Button type="primary" icon={<ThunderboltOutlined />} loading={analyzing} onClick={handleAnalyze}>
           {resume.score ? '重新 AI 评分' : 'AI 智能评分'}
         </Button>
+        <Button onClick={handleShowHistory}>评分历史</Button>
         <Button danger icon={<DeleteOutlined />} onClick={handleDelete}>删除</Button>
       </Space>
 
@@ -110,8 +153,12 @@ export default function ResumeDetailPage() {
         <Card style={{ marginBottom: 16, background: '#f6ffed' }}>
           <Row gutter={24}>
             <Col span={6}>
-              <Statistic title="AI 匹配评分" value={resume.score} suffix="分"
-                valueStyle={{ color: resume.score >= 80 ? '#52c41a' : resume.score >= 60 ? '#faad14' : '#ff4d4f' }} />
+              <Statistic
+                title={`AI 评分${resume.jd_id ? '（JD匹配）' : '（通用）'}`}
+                value={resume.score}
+                suffix="分"
+                valueStyle={{ color: resume.score >= 80 ? '#52c41a' : resume.score >= 60 ? '#faad14' : '#ff4d4f' }}
+              />
             </Col>
             <Col span={18}>
               <p><strong>评分理由：</strong>{resume.score_reason || '暂无'}</p>
@@ -152,11 +199,7 @@ export default function ResumeDetailPage() {
 
         <Divider />
         <p><strong>原始文件：</strong></p>
-        <a
-          href={`/uploads/${resume.file_path}`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <a href={`/uploads/${resume.file_path}`} target="_blank" rel="noopener noreferrer">
           📄 {resume.file_name}
         </a>
       </Card>
@@ -164,17 +207,30 @@ export default function ResumeDetailPage() {
       {/* HR 操作区 */}
       <Card title="HR 操作">
         <Space direction="vertical" style={{ width: '100%' }}>
-          <Space>
-            <span>AI 评分关键词：</span>
+          {/* JD 选择 + 关键词 */}
+          <Space wrap>
+            <span>关联 JD：</span>
+            <Select
+              placeholder="选择 JD（基于 JD 综合评价）"
+              value={selectedJD}
+              onChange={setSelectedJD}
+              allowClear
+              style={{ width: 320 }}
+              options={jdList.map((j) => ({ value: j.id, label: `[${j.department || '通用'}] ${j.title}` }))}
+            />
+          </Space>
+
+          <Space wrap>
+            <span>或输入关键词：</span>
             <Input
-              placeholder="输入职位关键词，逗号分隔（如：Python, FastAPI）"
+              placeholder="逗号分隔（如：Python, FastAPI）"
               value={jobKeywords}
               onChange={(e) => setJobKeywords(e.target.value)}
               style={{ width: 400 }}
             />
           </Space>
 
-          <Space style={{ marginTop: 8 }}>
+          <Space style={{ marginTop: 8 }} wrap>
             <span>HR 备注：</span>
             <Input.TextArea
               value={reviewNote}
@@ -185,7 +241,7 @@ export default function ResumeDetailPage() {
             />
           </Space>
 
-          <Space style={{ marginTop: 16 }}>
+          <Space style={{ marginTop: 16 }} wrap>
             <span>标记为：</span>
             <Select
               value={resume.status}
@@ -201,6 +257,23 @@ export default function ResumeDetailPage() {
           </Space>
         </Space>
       </Card>
+
+      {/* 评分历史弹窗 */}
+      <Modal
+        title="评分历史"
+        open={showHistory}
+        onCancel={() => setShowHistory(false)}
+        footer={null}
+        width={700}
+      >
+        <Table
+          columns={scoreColumns}
+          dataSource={scoreHistory}
+          rowKey="id"
+          pagination={false}
+          size="small"
+        />
+      </Modal>
     </div>
   );
 }

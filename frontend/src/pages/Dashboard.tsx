@@ -6,6 +6,7 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   StarOutlined,
+  SolutionOutlined,
 } from '@ant-design/icons';
 import { getStats } from '../api';
 import type { DashboardStats } from '../api';
@@ -29,6 +30,7 @@ export default function Dashboard() {
     { title: '初步通过', value: stats?.shortlisted_count || 0, icon: <CheckCircleOutlined />, color: '#52c41a' },
     { title: '已淘汰', value: stats?.rejected_count || 0, icon: <CloseCircleOutlined />, color: '#ff4d4f' },
     { title: '平均评分', value: stats?.avg_score ?? '-', icon: <StarOutlined />, color: '#722ed1', suffix: stats?.avg_score ? '分' : '' },
+    { title: 'JD 职位数', value: stats?.total_jds || 0, icon: <SolutionOutlined />, color: '#13c2c2' },
   ];
 
   return (

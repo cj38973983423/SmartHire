@@ -4,11 +4,14 @@ import {
   DashboardOutlined,
   FileTextOutlined,
   UploadOutlined,
+  SolutionOutlined,
 } from '@ant-design/icons';
 import Dashboard from './pages/Dashboard';
 import ResumeList from './pages/ResumeList';
 import ResumeDetail from './pages/ResumeDetail';
 import UploadPage from './pages/UploadPage';
+import JDList from './pages/JDList';
+import JDDetail from './pages/JDDetail';
 import zhCN from 'antd/locale/zh_CN';
 
 const { Sider, Content } = Layout;
@@ -20,6 +23,7 @@ function AppLayout() {
   const menuItems = [
     { key: '/', icon: <DashboardOutlined />, label: '数据看板' },
     { key: '/resumes', icon: <FileTextOutlined />, label: '简历列表' },
+    { key: '/jds', icon: <SolutionOutlined />, label: 'JD 管理' },
     { key: '/upload', icon: <UploadOutlined />, label: '上传简历' },
   ];
 
@@ -44,6 +48,8 @@ function AppLayout() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/resumes" element={<ResumeList />} />
             <Route path="/resumes/:id" element={<ResumeDetail />} />
+            <Route path="/jds" element={<JDList />} />
+            <Route path="/jds/:id" element={<JDDetail />} />
             <Route path="/upload" element={<UploadPage />} />
           </Routes>
         </Content>

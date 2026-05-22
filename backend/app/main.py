@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
 from app.database import init_db
-from app.routers import resumes, analyze
+from app.routers import resumes, analyze, jds
 
 
 @asynccontextmanager
@@ -34,6 +34,7 @@ app.add_middleware(
 
 # 注册路由
 app.include_router(resumes.router, prefix="/api/resumes", tags=["简历管理"])
+app.include_router(jds.router, prefix="/api/jds", tags=["JD 职位管理"])
 app.include_router(analyze.router, prefix="/api/analyze", tags=["AI 分析"])
 
 # 静态文件 — 直接访问上传的简历
@@ -48,10 +49,10 @@ async def health_check():
 
 @app.get("/api/stats")
 async def dashboard_stats():
-    """仪表盘数据 — 简单统计"""
+    """仪表盘数据"""
     from sqlalchemy import func
     from app.database import SessionLocal
-    from app.models import Resume, ResumeStatus
+    from app.models import Resume, ResumeStatus, JobDescription
 
     db = SessionLocal()
     try:
@@ -61,6 +62,7 @@ async def dashboard_stats():
         shortlisted = db.query(func.count(Resume.id)).filter(Resume.status == ResumeStatus.SHORTLISTED).scalar() or 0
         rejected = db.query(func.count(Resume.id)).filter(Resume.status == ResumeStatus.REJECTED).scalar() or 0
         avg_score = db.query(func.avg(Resume.score)).filter(Resume.score.isnot(None)).scalar()
+        total_jds = db.query(func.count(JobDescription.id)).scalar() or 0
 
         return {
             "total_resumes": total,
@@ -69,6 +71,7 @@ async def dashboard_stats():
             "shortlisted_count": shortlisted,
             "rejected_count": rejected,
             "avg_score": round(avg_score, 1) if avg_score else None,
+            "total_jds": total_jds,
         }
     finally:
         db.close()

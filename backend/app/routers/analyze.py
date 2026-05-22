@@ -1,4 +1,4 @@
-"""AI 分析路由 — 简历评分"""
+"""AI 分析路由 — 简历评分（支持通用关键词 & JD 全文评分）"""
 
 import json
 import logging
@@ -6,9 +6,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models import Resume
-from app.schemas import AnalyzeRequest, AnalyzeResponse
-from app.services.hermes_client import score_resume_with_hermes
+from app.models import Resume, JobDescription, ResumeScore
+from app.schemas import AnalyzeRequest, AnalyzeResponse, ResumeScoreItem
+from app.services.hermes_client import score_resume_with_hermes, score_resume_against_jd
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -16,7 +16,11 @@ router = APIRouter()
 
 @router.post("/score", response_model=AnalyzeResponse, summary="AI 简历评分")
 def analyze_resume(request: AnalyzeRequest, db: Session = Depends(get_db)):
-    """使用 Hermes Agent 对简历进行职位匹配评分"""
+    """使用 Hermes Agent 对简历进行职位匹配评分
+
+    - 传入 jd_id：基于 JD 全文进行四维度综合评价
+    - 只传 job_keywords：基于关键词进行通用评分
+    """
     resume = db.query(Resume).filter(Resume.id == request.resume_id).first()
     if not resume:
         raise HTTPException(status_code=404, detail="简历不存在")
@@ -24,31 +28,90 @@ def analyze_resume(request: AnalyzeRequest, db: Session = Depends(get_db)):
     if not resume.raw_text:
         raise HTTPException(status_code=400, detail="简历文本为空，请先上传有效文件")
 
-    # 调用 Hermes 评分
-    result = score_resume_with_hermes(resume.raw_text, request.job_keywords)
+    jd = None
+    jd_title = None
 
-    score = result.get("score", 0)
-    score_reason = result.get("score_reason", "")
-    summary = result.get("summary", "")
+    # ── 基于 JD 的综合评分 ──
+    if request.jd_id:
+        jd = db.query(JobDescription).filter(JobDescription.id == request.jd_id).first()
+        if not jd:
+            raise HTTPException(status_code=404, detail="JD 不存在")
+        jd_title = jd.title
 
-    # 更新数据库
-    resume.score = score
-    resume.score_reason = score_reason
-    if summary:
-        resume.summary = summary
+        result = score_resume_against_jd(resume.raw_text, jd.content, jd.title)
+
+        score = result.get("score", 0)
+        score_reason = result.get("score_reason", "")
+        summary = result.get("summary", "")
+        score_detail = json.dumps(result.get("score_detail", {}), ensure_ascii=False)
+
+        # 保存到 resume_scores 表（多对多评分记录）
+        score_record = ResumeScore(
+            resume_id=resume.id,
+            jd_id=jd.id,
+            score=score,
+            score_reason=score_reason,
+            summary=summary,
+            score_detail=score_detail,
+        )
+        db.add(score_record)
+
+        # 同时更新 resume 主表的最新评分
+        resume.score = score
+        resume.score_reason = score_reason
+        if summary:
+            resume.summary = summary
+        resume.jd_id = jd.id
+
+    # ── 通用关键词评分 ──
+    else:
+        result = score_resume_with_hermes(resume.raw_text, request.job_keywords)
+
+        score = result.get("score", 0)
+        score_reason = result.get("score_reason", "")
+        summary = result.get("summary", "")
+        score_detail = None
+
+        resume.score = score
+        resume.score_reason = score_reason
+        if summary:
+            resume.summary = summary
 
     db.commit()
     db.refresh(resume)
 
     return AnalyzeResponse(
         resume_id=resume.id,
+        jd_id=jd.id if jd else None,
+        jd_title=jd_title,
         score=score,
         score_reason=score_reason,
         summary=summary,
+        score_detail=score_detail,
     )
 
 
-@router.post("/score-all", summary="批量评分所有简历")
+@router.get("/scores/{resume_id}", response_model=list[ResumeScoreItem], summary="简历评分历史")
+def get_resume_scores(resume_id: int, db: Session = Depends(get_db)):
+    """获取某份简历的所有历史评分记录（含 JD 名称）"""
+    scores = (
+        db.query(ResumeScore, JobDescription.title.label("jd_title"))
+        .join(JobDescription, ResumeScore.jd_id == JobDescription.id, isouter=True)
+        .filter(ResumeScore.resume_id == resume_id)
+        .order_by(ResumeScore.created_at.desc())
+        .all()
+    )
+
+    results = []
+    for score, jd_title in scores:
+        item = ResumeScoreItem.model_validate(score)
+        item.jd_title = jd_title
+        results.append(item)
+
+    return results
+
+
+@router.post("/score-all", summary="批量评分所有简历（通用模式）")
 def score_all_resumes(
     job_keywords: list[str] = [],
     db: Session = Depends(get_db),

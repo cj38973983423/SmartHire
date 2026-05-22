@@ -19,6 +19,7 @@ export interface ResumeItem {
   score: number | null;
   status: 'pending' | 'reviewed' | 'shortlisted' | 'rejected';
   file_name: string;
+  jd_id: number | null;
   created_at: string;
 }
 
@@ -50,13 +51,29 @@ export interface DashboardStats {
   shortlisted_count: number;
   rejected_count: number;
   avg_score: number | null;
+  total_jds?: number;
 }
 
 export interface AnalyzeResponse {
   resume_id: number;
+  jd_id: number | null;
+  jd_title: string | null;
   score: number;
   score_reason: string;
   summary: string;
+  score_detail: string | null;
+}
+
+export interface ResumeScoreItem {
+  id: number;
+  resume_id: number;
+  jd_id: number;
+  score: number;
+  score_reason: string | null;
+  summary: string | null;
+  score_detail: string | null;
+  created_at: string;
+  jd_title: string | null;
 }
 
 export interface SearchParams {
@@ -67,18 +84,62 @@ export interface SearchParams {
   max_score?: number;
   min_experience?: number;
   max_experience?: number;
+  jd_id?: number;
   page?: number;
   page_size?: number;
   sort_by?: string;
   sort_order?: string;
 }
 
-// ── API 方法 ──
+// ── JD 类型 ──
+
+export interface JDItem {
+  id: number;
+  title: string;
+  department: string | null;
+  location: string | null;
+  is_active: number;
+  created_at: string;
+}
+
+export interface JDDetail extends JDItem {
+  content: string;
+  required_skills: string | null;
+  nice_to_have: string | null;
+  experience_required: string | null;
+  education_required: string | null;
+  summary: string | null;
+  updated_at: string;
+}
+
+export interface JDCreate {
+  title: string;
+  department?: string;
+  location?: string;
+  content: string;
+  required_skills?: string;
+  nice_to_have?: string;
+  experience_required?: string;
+  education_required?: string;
+  summary?: string;
+}
+
+export interface PaginatedJDs {
+  items: JDItem[];
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+}
+
+// ── API 方法：统计 ──
 
 export async function getStats(): Promise<DashboardStats> {
   const res = await api.get('/stats');
   return res.data;
 }
+
+// ── API 方法：简历 ──
 
 export async function getResumes(params: SearchParams): Promise<PaginatedResumes> {
   const res = await api.get('/resumes', { params });
@@ -106,9 +167,42 @@ export async function deleteResume(id: number): Promise<void> {
   await api.delete(`/resumes/${id}`);
 }
 
-export async function analyzeResume(resume_id: number, job_keywords: string[] = []): Promise<AnalyzeResponse> {
-  const res = await api.post('/analyze/score', { resume_id, job_keywords });
+// ── API 方法：AI 分析 ──
+
+export async function analyzeResume(resume_id: number, job_keywords: string[] = [], jd_id?: number): Promise<AnalyzeResponse> {
+  const res = await api.post('/analyze/score', { resume_id, job_keywords, jd_id });
   return res.data;
+}
+
+export async function getResumeScores(resume_id: number): Promise<ResumeScoreItem[]> {
+  const res = await api.get(`/analyze/scores/${resume_id}`);
+  return res.data;
+}
+
+// ── API 方法：JD 职位 ──
+
+export async function getJDs(params?: { keyword?: string; active_only?: boolean; page?: number; page_size?: number }): Promise<PaginatedJDs> {
+  const res = await api.get('/jds', { params });
+  return res.data;
+}
+
+export async function getJD(id: number): Promise<JDDetail> {
+  const res = await api.get(`/jds/${id}`);
+  return res.data;
+}
+
+export async function createJD(data: JDCreate): Promise<JDDetail> {
+  const res = await api.post('/jds', data);
+  return res.data;
+}
+
+export async function updateJD(id: number, data: Partial<JDCreate & { is_active: number }>): Promise<JDDetail> {
+  const res = await api.put(`/jds/${id}`, data);
+  return res.data;
+}
+
+export async function deleteJD(id: number): Promise<void> {
+  await api.delete(`/jds/${id}`);
 }
 
 export default api;
