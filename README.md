@@ -1,6 +1,18 @@
-# 🤖 HR 招聘助手
+# 🤖 SmartHire — AI 招聘助手
 
 > 基于 Hermes Agent 的智能简历初筛系统 — Web 前端 + FastAPI 后端，AI 辅助 HR 快速筛选候选人。
+
+## 快速开始
+
+👉 **零基础用户请看 [TUTORIAL.md](TUTORIAL.md)** — 从 Python/Node.js 安装到跑起来的完整教程。
+
+```bash
+# 一键启动（需要先装好 Python 和 Node.js）
+cd backend && pip install -r requirements.txt && uvicorn app.main:app --reload --port 8000
+# 新开终端
+cd frontend && npm install && npm run dev
+# 浏览器打开 http://localhost:5173
+```
 
 ## 功能
 
