@@ -175,6 +175,12 @@ class ResumeScoreItem(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class BatchScoreRequest(BaseModel):
+    """批量评分请求"""
+    resume_ids: list[int] = Field(..., min_length=1, max_length=50, description="简历 ID 列表")
+    jd_id: int = Field(..., description="JD ID")
+
+
 # ══════════════════════════════════════════════
 # 仪表盘
 # ══════════════════════════════════════════════

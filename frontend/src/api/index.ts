@@ -167,6 +167,19 @@ export async function deleteResume(id: number): Promise<void> {
   await api.delete(`/resumes/${id}`);
 }
 
+// ── API 方法：批量上传 ──
+
+export async function batchUploadResumes(files: File[]): Promise<{
+  total: number; success: number; failed: number;
+  results: { id: number; file_name: string }[];
+  errors: { file: string; error: string }[];
+}> {
+  const form = new FormData();
+  files.forEach((f) => form.append('files', f));
+  const res = await api.post('/resumes/batch', form);
+  return res.data;
+}
+
 // ── API 方法：AI 分析 ──
 
 export async function analyzeResume(resume_id: number, job_keywords: string[] = [], jd_id?: number): Promise<AnalyzeResponse> {
@@ -176,6 +189,14 @@ export async function analyzeResume(resume_id: number, job_keywords: string[] = 
 
 export async function getResumeScores(resume_id: number): Promise<ResumeScoreItem[]> {
   const res = await api.get(`/analyze/scores/${resume_id}`);
+  return res.data;
+}
+
+export async function batchScoreResumes(resume_ids: number[], jd_id: number): Promise<{
+  jd_title: string; total: number; scored: number;
+  results: { resume_id: number; resume_name: string; score: number; score_reason: string }[];
+}> {
+  const res = await api.post('/analyze/score-batch', { resume_ids, jd_id });
   return res.data;
 }
 

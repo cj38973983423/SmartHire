@@ -2,6 +2,7 @@
 
 import datetime
 import json
+import logging
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_
@@ -15,6 +16,7 @@ from app.schemas import (
 from app.services.storage import save_upload_file, extract_text
 from app.services.hermes_client import parse_resume_with_hermes
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
@@ -58,6 +60,54 @@ async def upload_resume(file: UploadFile = File(...), db: Session = Depends(get_
         logging.getLogger(__name__).warning(f"Resume parse failed: {e}")
 
     return ResumeUploadResponse(id=resume.id, file_name=resume.file_name)
+
+
+async def _process_single_upload(file: UploadFile, db: Session) -> dict:
+    """处理单份简历上传（供批量调用）"""
+    relative_path = await save_upload_file(file)
+    ext = file.filename.rsplit(".", 1)[-1].lower() if "." in (file.filename or "") else ""
+
+    resume = Resume(
+        file_path=relative_path,
+        file_name=file.filename or "unknown",
+        file_type=ext,
+        status=ResumeStatus.PENDING,
+    )
+    db.add(resume)
+    db.flush()
+
+    try:
+        raw_text = extract_text(relative_path, ext)
+        if raw_text:
+            resume.raw_text = raw_text
+            parsed = parse_resume_with_hermes(raw_text)
+            if parsed:
+                resume.name = parsed.get("name")
+                resume.skills = json.dumps(parsed.get("skills", []), ensure_ascii=False) if parsed.get("skills") else None
+                resume.experience_years = parsed.get("experience_years")
+                resume.education = parsed.get("education")
+                resume.work_experience = parsed.get("work_experience")
+                resume.summary = parsed.get("summary")
+    except Exception as e:
+        logger.warning(f"Parse failed for {file.filename}: {e}")
+
+    return {"id": resume.id, "file_name": resume.file_name}
+
+
+@router.post("/batch", summary="批量上传简历")
+async def batch_upload_resumes(files: list[UploadFile] = File(...), db: Session = Depends(get_db)):
+    """一次性上传多份简历（选择多个文件或整个文件夹），返回上传结果列表"""
+    results = []
+    errors = []
+    for file in files:
+        try:
+            result = await _process_single_upload(file, db)
+            results.append(result)
+        except Exception as e:
+            errors.append({"file": file.filename, "error": str(e)})
+
+    db.commit()
+    return {"total": len(files), "success": len(results), "failed": len(errors), "results": results, "errors": errors}
 
 
 @router.get("", response_model=PaginatedResumes, summary="简历列表")

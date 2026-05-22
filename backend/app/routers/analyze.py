@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import Resume, JobDescription, ResumeScore
-from app.schemas import AnalyzeRequest, AnalyzeResponse, ResumeScoreItem
+from app.schemas import AnalyzeRequest, AnalyzeResponse, ResumeScoreItem, BatchScoreRequest
 from app.services.hermes_client import score_resume_with_hermes, score_resume_against_jd
 
 logger = logging.getLogger(__name__)
@@ -139,3 +139,62 @@ def score_all_resumes(
 
     db.commit()
     return {"scored": scored, "failed": failed, "total": len(resumes)}
+
+
+@router.post("/score-batch", summary="批量 JD 评分")
+def batch_score_resumes(request: BatchScoreRequest, db: Session = Depends(get_db)):
+    """选中多份简历，基于同一个 JD 进行批量 AI 评分"""
+    jd = db.query(JobDescription).filter(JobDescription.id == request.jd_id).first()
+    if not jd:
+        raise HTTPException(status_code=404, detail="JD 不存在")
+
+    resumes = db.query(Resume).filter(
+        Resume.id.in_(request.resume_ids),
+        Resume.raw_text.isnot(None),
+        Resume.raw_text != "",
+    ).all()
+
+    if not resumes:
+        raise HTTPException(status_code=400, detail="所选简历均无可用的文本内容")
+
+    results = []
+    for resume in resumes:
+        try:
+            result = score_resume_against_jd(resume.raw_text, jd.content, jd.title)
+            score = result.get("score", 0)
+            score_reason = result.get("score_reason", "")
+            summary = result.get("summary", "")
+            score_detail = json.dumps(result.get("score_detail", {}), ensure_ascii=False)
+
+            # 保存评分记录
+            score_record = ResumeScore(
+                resume_id=resume.id, jd_id=jd.id,
+                score=score, score_reason=score_reason,
+                summary=summary, score_detail=score_detail,
+            )
+            db.add(score_record)
+
+            # 更新简历主表
+            resume.score = score
+            resume.score_reason = score_reason
+            if summary:
+                resume.summary = summary
+            resume.jd_id = jd.id
+
+            results.append({
+                "resume_id": resume.id,
+                "resume_name": resume.name or "未知",
+                "score": score,
+                "score_reason": score_reason,
+            })
+        except Exception as e:
+            logger.warning(f"Batch score failed for resume #{resume.id}: {e}")
+            results.append({
+                "resume_id": resume.id,
+                "resume_name": resume.name or "未知",
+                "score": 0,
+                "score_reason": f"评分失败: {e}",
+            })
+
+    db.commit()
+    return {"jd_title": jd.title, "total": len(resumes), "scored": len(results), "results": results}

@@ -5,6 +5,8 @@ import {
   FileTextOutlined,
   UploadOutlined,
   SolutionOutlined,
+  StarOutlined,
+  DeleteOutlined,
 } from '@ant-design/icons';
 import Dashboard from './pages/Dashboard';
 import ResumeList from './pages/ResumeList';
@@ -22,12 +24,45 @@ function AppLayout() {
 
   const menuItems = [
     { key: '/', icon: <DashboardOutlined />, label: '数据看板' },
-    { key: '/resumes', icon: <FileTextOutlined />, label: '简历列表' },
+    {
+      key: 'resumes-group', icon: <FileTextOutlined />, label: '简历管理',
+      children: [
+        { key: '/resumes', label: '全部简历' },
+        { key: '/resumes#shortlist', icon: <StarOutlined />, label: '待筛选 (≥60分)' },
+        { key: '/resumes#rejected', icon: <DeleteOutlined />, label: '淘汰库 (<60分)' },
+      ],
+    },
     { key: '/jds', icon: <SolutionOutlined />, label: 'JD 管理' },
-    { key: '/upload', icon: <UploadOutlined />, label: '上传简历' },
+    { key: '/upload', icon: <UploadOutlined />, label: '批量上传' },
   ];
 
-  const selectedKey = '/' + location.pathname.split('/')[1];
+  // 根据路径 + hash 确定选中项
+  const pathBase = '/' + location.pathname.split('/')[1];
+  const fullPath = pathBase + location.hash;
+
+  const findSelectedKey = (items: any[]): string => {
+    for (const item of items) {
+      if (item.key === fullPath) return fullPath;
+      if (item.key === pathBase) return item.key;
+      if (item.children) {
+        const child = findSelectedKey(item.children);
+        if (child) return child;
+      }
+    }
+    return '/';
+  };
+
+  const selectedKey = findSelectedKey(menuItems);
+
+  const handleMenuClick = ({ key }: { key: string }) => {
+    // 处理 hash 路由
+    if (key.includes('#')) {
+      const [path, hash] = key.split('#');
+      navigate(`${path}#${hash}`);
+    } else {
+      navigate(key);
+    }
+  };
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -38,8 +73,9 @@ function AppLayout() {
         <Menu
           mode="inline"
           selectedKeys={[selectedKey]}
+          defaultOpenKeys={['resumes-group']}
           items={menuItems}
-          onClick={({ key }) => navigate(key)}
+          onClick={handleMenuClick}
         />
       </Sider>
       <Layout>
