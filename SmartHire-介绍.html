@@ -5,525 +5,671 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SmartHire — AI 智能招聘助手</title>
 <style>
-  :root {
-    --bg: #0f172a;
-    --card: #1e293b;
-    --accent: #38bdf8;
-    --accent2: #818cf8;
-    --green: #4ade80;
-    --orange: #fb923c;
-    --red: #f87171;
-    --text: #e2e8f0;
-    --muted: #94a3b8;
-    --border: #334155;
-  }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-    background: var(--bg);
-    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: #f8fafc;
+    color: #1e293b;
     line-height: 1.6;
   }
-  .container { max-width: 1000px; margin: 0 auto; padding: 24px 20px; }
 
-  /* Hero */
-  .hero {
-    text-align: center;
-    padding: 64px 0 48px;
-    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 48px;
+  /* ─── Nav ─── */
+  .nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid #e2e8f0;
+    padding: 0 24px;
   }
-  .hero h1 {
-    font-size: 3rem;
-    font-weight: 800;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
+  .nav-inner {
+    max-width: 1200px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 60px;
+  }
+  .nav-logo { font-size: 1.25rem; font-weight: 800; color: #0f172a; }
+  .nav-logo span { color: #3b82f6; }
+  .nav-links { display: flex; gap: 24px; align-items: center; }
+  .nav-links a { text-decoration: none; color: #64748b; font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
+  .nav-links a:hover { color: #3b82f6; }
+  .nav-btn {
+    padding: 8px 20px; border-radius: 8px; background: #3b82f6; color: #fff !important;
+    font-weight: 600; text-decoration: none; font-size: 0.85rem;
+    transition: background 0.2s;
+  }
+  .nav-btn:hover { background: #2563eb !important; }
+
+  /* ─── Hero ─── */
+  .hero {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+    color: #fff;
+    padding: 80px 24px 100px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle at 30% 50%, rgba(59,130,246,0.08) 0%, transparent 50%),
+                radial-gradient(circle at 70% 50%, rgba(139,92,246,0.08) 0%, transparent 50%);
+  }
+  .hero-inner { position: relative; max-width: 800px; margin: 0 auto; }
+  .hero-badge {
+    display: inline-block;
+    padding: 4px 16px;
+    border-radius: 20px;
+    background: rgba(59,130,246,0.15);
+    color: #93c5fd;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid rgba(59,130,246,0.3);
+    margin-bottom: 20px;
+  }
+  .hero h1 { font-size: 3.5rem; font-weight: 800; line-height: 1.15; margin-bottom: 16px; }
+  .hero h1 span {
+    background: linear-gradient(135deg, #60a5fa, #a78bfa);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin-bottom: 12px;
   }
-  .hero p {
-    font-size: 1.2rem;
-    color: var(--muted);
-    max-width: 600px;
-    margin: 0 auto;
-  }
-  .hero .badges { margin-top: 24px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-  .hero .badge {
-    display: inline-block;
-    padding: 4px 14px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    background: var(--card);
-    border: 1px solid var(--border);
-    color: var(--text);
-  }
-  .badge.python { border-color: #3776AB; color: #3776AB; }
-  .badge.react { border-color: #61DAFB; color: #61DAFB; }
-  .badge.fastapi { border-color: #009688; color: #009688; }
-  .badge.antd { border-color: #1677FF; color: #1677FF; }
-  .badge.llm { border-color: #a855f7; color: #a855f7; }
-  .badge.sqlite { border-color: #003B57; color: #41BDF5; }
-
-  /* Section */
-  section { margin-bottom: 56px; }
-  .section-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 24px;
-    padding-bottom: 8px;
-    border-bottom: 2px solid var(--accent);
-    display: inline-block;
-  }
-
-  /* Feature Grid */
-  .feature-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 16px;
-  }
-  .feature-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
+  .hero p { font-size: 1.15rem; color: #94a3b8; max-width: 600px; margin: 0 auto 32px; line-height: 1.7; }
+  .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn-primary {
+    padding: 14px 32px; border-radius: 10px; background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    color: #fff; font-weight: 700; font-size: 1rem; text-decoration: none;
     transition: transform 0.2s, box-shadow 0.2s;
   }
-  .feature-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(59,130,246,0.3); }
+  .btn-outline-light {
+    padding: 14px 32px; border-radius: 10px; border: 1px solid #334155;
+    color: #e2e8f0; font-weight: 600; font-size: 1rem; text-decoration: none;
+    transition: background 0.2s;
   }
-  .feature-card .icon { font-size: 2rem; margin-bottom: 8px; }
-  .feature-card h3 { font-size: 1rem; margin-bottom: 6px; }
-  .feature-card p { font-size: 0.85rem; color: var(--muted); }
+  .btn-outline-light:hover { background: #1e293b; }
 
-  /* Tech Stack */
-  .stack-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 12px;
-  }
-  .stack-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px 16px;
-  }
-  .stack-item .label { font-size: 0.9rem; font-weight: 600; }
-  .stack-item .desc { font-size: 0.8rem; color: var(--muted); }
+  /* ─── Section ─── */
+  .section { max-width: 1200px; margin: 0 auto; padding: 80px 24px; }
+  .section-label { font-size: 0.85rem; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+  .section-title { font-size: 2rem; font-weight: 800; margin-bottom: 8px; }
+  .section-desc { color: #64748b; font-size: 1.05rem; max-width: 600px; margin-bottom: 48px; }
 
-  /* Architecture */
-  .arch-box {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 24px;
-    overflow-x: auto;
-    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
-    font-size: 0.78rem;
-    line-height: 1.5;
-    white-space: pre;
-    color: var(--muted);
+  /* ─── App Mockup ─── */
+  .mockup-wrap {
+    background: #fff; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 20px 40px -10px rgba(0,0,0,0.2);
+    overflow: hidden; margin: 0 auto; max-width: 1100px;
   }
-  .arch-box .hl { color: var(--accent); }
-  .arch-box .hl2 { color: var(--green); }
-  .arch-box .hl3 { color: var(--orange); }
+  .mockup-header {
+    display: flex; align-items: center; gap: 8px; padding: 12px 16px;
+    background: #f1f5f9; border-bottom: 1px solid #e2e8f0;
+  }
+  .mockup-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .mockup-dot.r { background: #ef4444; }
+  .mockup-dot.y { background: #f59e0b; }
+  .mockup-dot.g { background: #22c55e; }
+  .mockup-title { margin-left: 8px; font-size: 0.8rem; color: #94a3b8; font-family: monospace; }
 
-  /* Flow */
-  .flow {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin: 16px 0;
+  .mockup-body {
+    display: flex; min-height: 480px;
   }
-  .flow-step {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 18px;
-    font-size: 0.9rem;
-    text-align: center;
+  .mockup-sidebar {
+    width: 200px; background: #f8fafc; border-right: 1px solid #e2e8f0;
+    padding: 16px 0;
   }
-  .flow-arrow { color: var(--accent); font-size: 1.2rem; }
+  .mockup-menu-item {
+    padding: 10px 20px; font-size: 0.85rem; color: #64748b;
+    display: flex; align-items: center; gap: 8px; cursor: default; position: relative;
+  }
+  .mockup-menu-item.active { background: #eff6ff; color: #3b82f6; font-weight: 600; }
+  .mockup-menu-item.active::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #3b82f6; border-radius: 0 3px 3px 0;
+  }
+  .mockup-menu-item .badge {
+    margin-left: auto; background: #e2e8f0; border-radius: 10px; padding: 1px 8px; font-size: 0.75rem; color: #64748b;
+  }
+  .mockup-menu-item .badge.green { background: #dcfce7; color: #16a34a; }
 
-  /* API Table */
-  .api-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.85rem;
-  }
-  .api-table th, .api-table td {
-    text-align: left;
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--border);
-  }
-  .api-table th { background: var(--card); font-weight: 600; color: var(--accent); }
-  .api-table td:first-child { font-family: monospace; font-weight: 600; }
-  .method { display: inline-block; padding: 1px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; }
-  .method.get { background: #1e3a5f; color: #60a5fa; }
-  .method.post { background: #14532d; color: #4ade80; }
-  .method.patch { background: #5b2e0d; color: #fb923c; }
-  .method.put { background: #5b2e0d; color: #fb923c; }
-  .method.delete { background: #450a0a; color: #f87171; }
+  .mockup-main { flex: 1; padding: 24px; overflow: hidden; }
 
-  /* Quick Start */
-  .code-block {
-    background: #0d1117;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 18px 20px;
-    font-family: 'JetBrains Mono', 'Fira Code', monospace;
-    font-size: 0.85rem;
-    line-height: 1.7;
-    overflow-x: auto;
-    color: #c9d1d9;
-    margin: 12px 0;
+  /* Dashboard Stats */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+  .stat-card {
+    background: #f8fafc; border-radius: 10px; padding: 16px; border: 1px solid #e2e8f0;
   }
-  .code-block .cmt { color: #8b949e; }
-  .code-block .kwd { color: #ff7b72; }
-  .code-block .str { color: #a5d6ff; }
-  .code-block .var { color: #d2a8ff; }
+  .stat-card .num { font-size: 1.6rem; font-weight: 800; color: #0f172a; }
+  .stat-card .label { font-size: 0.8rem; color: #64748b; margin-top: 2px; }
+  .stat-card .trend { font-size: 0.75rem; margin-top: 4px; }
+  .stat-card .trend.up { color: #16a34a; }
+  .stat-card .trend.down { color: #ef4444; }
 
-  /* Links */
-  .links {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-top: 24px;
-  }
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 28px;
-    border-radius: 8px;
-    font-weight: 600;
-    text-decoration: none;
-    font-size: 0.95rem;
-    transition: all 0.2s;
-  }
-  .btn-primary {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: #000;
-  }
-  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(56,189,248,0.3); }
-  .btn-outline {
-    border: 1px solid var(--border);
-    color: var(--text);
-  }
-  .btn-outline:hover { border-color: var(--accent); }
+  /* Table Mock */
+  .mock-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  .mock-table th { text-align: left; padding: 10px 12px; border-bottom: 2px solid #e2e8f0; color: #64748b; font-weight: 600; font-size: 0.78rem; }
+  .mock-table td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; }
+  .mock-table .name { font-weight: 600; color: #0f172a; }
+  .mock-table .skill { display: inline-block; padding: 1px 8px; border-radius: 4px; background: #eff6ff; color: #3b82f6; font-size: 0.75rem; margin-right: 3px; }
+  .score-pill { display: inline-block; padding: 2px 10px; border-radius: 12px; font-weight: 700; font-size: 0.8rem; }
+  .score-pill.high { background: #dcfce7; color: #16a34a; }
+  .score-pill.mid { background: #fef9c3; color: #a16207; }
+  .score-pill.low { background: #fee2e2; color: #dc2626; }
+  .status-tag { font-size: 0.75rem; padding: 2px 10px; border-radius: 12px; font-weight: 600; }
+  .status-tag.pending { background: #fef9c3; color: #a16207; }
+  .status-tag.shortlisted { background: #dcfce7; color: #16a34a; }
+  .status-tag.rejected { background: #fee2e2; color: #dc2626; }
 
-  /* Footer */
-  .footer {
-    text-align: center;
-    padding: 32px 0;
-    border-top: 1px solid var(--border);
-    color: var(--muted);
-    font-size: 0.85rem;
-  }
+  /* Tabs */
+  .mock-tabs { display: flex; gap: 0; border-bottom: 2px solid #e2e8f0; margin-bottom: 16px; }
+  .mock-tab { padding: 8px 16px; font-size: 0.85rem; color: #64748b; cursor: default; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+  .mock-tab.active { color: #3b82f6; border-bottom-color: #3b82f6; font-weight: 600; }
+  .mock-tab .count { margin-left: 6px; font-size: 0.75rem; color: #94a3b8; }
 
-  @media (max-width: 600px) {
-    .hero h1 { font-size: 2rem; }
-    .hero p { font-size: 1rem; }
-    .api-table { font-size: 0.75rem; }
-    .api-table th, .api-table td { padding: 6px 8px; }
+  .bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 4px; }
+  .bar-seg { height: 100%; }
+
+  /* ─── Stats Numbers Bar ─── */
+  .stat-numbers { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin: 0 auto; max-width: 900px; }
+  .stat-number {
+    text-align: center; padding: 28px 16px;
+    background: #fff; border-radius: 12px; border: 1px solid #e2e8f0;
   }
+  .stat-number .num { font-size: 2.5rem; font-weight: 800; color: #0f172a; }
+  .stat-number .label { color: #64748b; font-size: 0.9rem; }
+
+  /* ─── Feature Grid ─── */
+  .feature-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .feature-card {
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 28px 20px;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .feature-card:hover { transform: translateY(-3px); box-shadow: 0 12px 24px -8px rgba(0,0,0,0.08); }
+  .feature-card .icon { font-size: 2rem; margin-bottom: 12px; }
+  .feature-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+  .feature-card p { font-size: 0.85rem; color: #64748b; line-height: 1.6; }
+
+  @media (max-width: 768px) { .feature-grid { grid-template-columns: repeat(2,1fr); } .stats-row { grid-template-columns: repeat(2,1fr); } .mockup-sidebar { display: none; } .hero h1 { font-size: 2.2rem; } }
+  @media (max-width: 480px) { .feature-grid { grid-template-columns: 1fr; } }
+
+  /* ─── Score Detail ─── */
+  .score-detail-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 12px 0 20px; }
+  .score-detail-item { text-align: center; padding: 12px; border-radius: 10px; background: #f8fafc; border: 1px solid #e2e8f0; }
+  .score-detail-item .dim-label { font-size: 0.75rem; color: #64748b; }
+  .score-detail-item .dim-score { font-size: 1.3rem; font-weight: 800; margin: 4px 0; }
+  .score-detail-item .dim-reason { font-size: 0.7rem; color: #94a3b8; }
+
+  /* ─── Upload Area ─── */
+  .upload-area {
+    border: 2px dashed #cbd5e1; border-radius: 12px; padding: 40px; text-align: center;
+    background: #f8fafc; margin: 16px 0;
+  }
+  .upload-area .icon { font-size: 2.5rem; margin-bottom: 8px; }
+  .upload-area p { color: #64748b; font-size: 0.9rem; }
+  .upload-area .btn-upload {
+    display: inline-block; margin-top: 12px; padding: 10px 24px; border-radius: 8px;
+    background: #3b82f6; color: #fff; font-weight: 600; font-size: 0.85rem; cursor: default;
+  }
+  .upload-files { display: flex; gap: 8px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }
+  .upload-file { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; background: #fff; border: 1px solid #e2e8f0; font-size: 0.8rem; }
+  .upload-file .check { color: #22c55e; font-weight: 700; }
+
+  /* ─── Footer ─── */
+  .footer { text-align: center; padding: 48px 24px; border-top: 1px solid #e2e8f0; color: #94a3b8; font-size: 0.85rem; }
+  .footer a { color: #3b82f6; text-decoration: none; }
+
+  /* ─── Workflow Arrow ─── */
+  .workflow { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px; }
+  .workflow-step {
+    padding: 8px 16px; border-radius: 8px; background: #fff; border: 1px solid #e2e8f0;
+    font-size: 0.85rem; font-weight: 500; text-align: center;
+  }
+  .workflow-step.pass { border-color: #22c55e; background: #f0fdf4; color: #16a34a; }
+  .workflow-step.fail { border-color: #ef4444; background: #fef2f2; color: #dc2626; }
+  .workflow-arrow { color: #3b82f6; font-size: 1.1rem; }
+  .workflow-or { color: #94a3b8; font-size: 0.75rem; font-weight: 600; }
+
+  /* ─── JD Mock ─── */
+  .jd-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .jd-card .title { font-weight: 700; font-size: 0.9rem; }
+  .jd-card .meta { font-size: 0.78rem; color: #94a3b8; margin-top: 2px; }
+  .jd-card .switch { width: 36px; height: 20px; border-radius: 10px; background: #22c55e; position: relative; }
+  .jd-card .switch::after { content: ''; position: absolute; width: 16px; height: 16px; border-radius: 50%; background: #fff; top: 2px; right: 2px; }
+
+  .btn-ghost { padding: 6px 16px; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 0.8rem; color: #64748b; cursor: default; background: #fff; }
 </style>
 </head>
 <body>
 
-<div class="hero">
-  <h1>🤖 SmartHire</h1>
-  <p>AI 智能招聘助手 —— 基于大语言模型的简历初筛系统，<br>帮助 HR 从海量简历中快速锁定高匹配度候选人</p>
-  <div class="badges">
-    <span class="badge python">Python 3.11</span>
-    <span class="badge react">React 18</span>
-    <span class="badge fastapi">FastAPI</span>
-    <span class="badge antd">Ant Design 5</span>
-    <span class="badge llm">LLM-Powered</span>
-    <span class="badge sqlite">SQLite</span>
-  </div>
-  <div class="links">
-    <a href="https://github.com/cj38973983423/SmartHire" class="btn btn-primary" target="_blank">GitHub 仓库 →</a>
-    <a href="https://github.com/cj38973983423/SmartHire/blob/main/RESUME-PROJECT.md" class="btn btn-outline" target="_blank">📋 简历项目描述</a>
-    <a href="https://github.com/cj38973983423/SmartHire/blob/main/TUTORIAL.md" class="btn btn-outline" target="_blank">📖 零基础教程</a>
+<div class="nav">
+  <div class="nav-inner">
+    <div class="nav-logo">Smart<span>Hire</span></div>
+    <div class="nav-links">
+      <a href="#">功能介绍</a>
+      <a href="#">界面预览</a>
+      <a href="#">快速开始</a>
+      <a href="https://github.com/cj38973983423/SmartHire" target="_blank">GitHub</a>
+      <a href="https://github.com/cj38973983423/SmartHire" class="nav-btn" target="_blank">查看源码 →</a>
+    </div>
   </div>
 </div>
 
-<div class="container">
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">🤖 AI-Powered · 开源免费</div>
+    <h1>AI 帮你从一堆简历中<br>找到 <span>最合适的人</span></h1>
+    <p>上传简历 → AI 自动解析 → 基于职位描述四维度智能评分 → ≥60分自动进入待筛选。HR 只需要做最终决策，剩下的交给 AI。</p>
+    <div class="hero-actions">
+      <a href="#mockup" class="btn-primary">🎯 看看长什么样</a>
+      <a href="https://github.com/cj38973983423/SmartHire" class="btn-outline-light" target="_blank">GitHub 仓库 →</a>
+    </div>
+  </div>
+</div>
+
+<!-- 核心数据 -->
+<div class="section" style="padding-top: -20px; margin-top: -40px;">
+  <div class="stat-numbers">
+    <div class="stat-number"><div class="num">16+</div><div class="label">API 接口</div></div>
+    <div class="stat-number"><div class="num">3</div><div class="label">数据表</div></div>
+    <div class="stat-number"><div class="num">6</div><div class="label">前端页面</div></div>
+    <div class="stat-number"><div class="num">4</div><div class="label">评分维度</div></div>
+  </div>
+</div>
 
 <!-- 功能介绍 -->
-<section>
-  <h2 class="section-title">✨ 核心功能</h2>
+<div class="section" id="features">
+  <div class="section-label">✨ 功能</div>
+  <h2 class="section-title">一套完整的招聘筛选工具</h2>
+  <p class="section-desc">从简历上传、AI 解析、JD 匹配评分到人工决策，全流程覆盖。</p>
   <div class="feature-grid">
     <div class="feature-card">
       <div class="icon">📤</div>
       <h3>批量上传简历</h3>
-      <p>支持 PDF/DOCX，多选文件或拖拽整个文件夹，上传即解析</p>
+      <p>支持 PDF 和 DOCX 格式，可多选文件或直接拖拽整个文件夹，一次搞定</p>
     </div>
     <div class="feature-card">
       <div class="icon">🤖</div>
       <h3>AI 自动解析</h3>
-      <p>自动提取姓名、技能列表、工作年限、教育经历等结构化信息</p>
+      <p>上传后自动提取姓名、技能列表、工作年限、教育经历等结构化信息</p>
     </div>
     <div class="feature-card">
       <div class="icon">📋</div>
       <h3>JD 职位管理</h3>
-      <p>创建职位描述，定义技能要求、经验年限、学历门槛，启停控制</p>
+      <p>创建和管理职位描述，定义必备技能、经验年限、学历门槛，可启停</p>
     </div>
     <div class="feature-card">
       <div class="icon">🧠</div>
-      <h3>AI 四维度评分</h3>
+      <h3>四维度 AI 评分</h3>
       <p>基于 JD 全文，从技能40% / 经验30% / 教育15% / 综合15% 综合打分</p>
     </div>
     <div class="feature-card">
       <div class="icon">⭐</div>
-      <h3>待筛选区 (≥60分)</h3>
-      <p>高分候选人自动归类，按分数降序排列，优先查看</p>
+      <h3>待筛选区</h3>
+      <p>评分 ≥ 60 分的候选人自动归类，按分数降序排列，优先处理高匹配人才</p>
     </div>
     <div class="feature-card">
       <div class="icon">🗑️</div>
-      <h3>淘汰库 (&lt;60分)</h3>
-      <p>低分候选人自动归入，HR 可人工复核、写备注</p>
+      <h3>淘汰库</h3>
+      <p>评分低于 60 分自动归入，不遗漏潜在候选人，HR 可人工复核</p>
     </div>
     <div class="feature-card">
       <div class="icon">📊</div>
       <h3>数据看板</h3>
-      <p>简历总数、各状态数量、平均评分，招聘进度一目了然</p>
+      <p>总览统计 — 简历总数、各状态数量、平均评分，招聘进度一目了然</p>
     </div>
     <div class="feature-card">
       <div class="icon">👨‍💼</div>
       <h3>人工决策</h3>
-      <p>HR 标记通过 / 淘汰，支持添加备注，AI 辅助人工判断</p>
+      <p>AI 辅助 + 人工把关，支持标记通过/淘汰、添加备注，灵活管控</p>
     </div>
   </div>
-</section>
+</div>
 
-<!-- 技术栈 -->
-<section>
-  <h2 class="section-title">🛠 技术栈</h2>
-  <div class="stack-grid">
-    <div class="stack-item">
-      <div style="font-size:1.5rem">⚛️</div>
-      <div><div class="label">React 18 + TypeScript</div><div class="desc">前端框架 · 类型安全</div></div>
-    </div>
-    <div class="stack-item">
-      <div style="font-size:1.5rem">⚡</div>
-      <div><div class="label">Vite 5</div><div class="desc">构建工具 · 极速 HMR</div></div>
-    </div>
-    <div class="stack-item">
-      <div style="font-size:1.5rem">🎨</div>
-      <div><div class="label">Ant Design 5</div><div class="desc">UI 组件库 · 企业级质量</div></div>
-    </div>
-    <div class="stack-item">
-      <div style="font-size:1.5rem">🐍</div>
-      <div><div class="label">FastAPI + Python 3.11</div><div class="desc">异步高性能后端</div></div>
-    </div>
-    <div class="stack-item">
-      <div style="font-size:1.5rem">🗄️</div>
-      <div><div class="label">SQLAlchemy 2.0 + SQLite</div><div class="desc">ORM · 可切换 PostgreSQL</div></div>
-    </div>
-    <div class="stack-item">
-      <div style="font-size:1.5rem">🤖</div>
-      <div><div class="label">Hermes Agent (DeepSeek)</div><div class="desc">AI 引擎 · subprocess 调用</div></div>
-    </div>
-    <div class="stack-item">
-      <div style="font-size:1.5rem">📄</div>
-      <div><div class="label">PyPDF2 + python-docx</div><div class="desc">文档解析 · 零外部依赖</div></div>
-    </div>
-    <div class="stack-item">
-      <div style="font-size:1.5rem">🔄</div>
-      <div><div class="label">GitHub Actions</div><div class="desc">CI · 自动 lint + 构建</div></div>
+<!-- 完整工作流 -->
+<div class="section" style="background:#fff; border-top:1px solid #e2e8f0; border-bottom:1px solid #e2e8f0; max-width:100%; padding:60px 24px;">
+  <div style="max-width:1200px; margin:0 auto;">
+    <div class="section-label" style="text-align:center;">🔄 工作流</div>
+    <h2 class="section-title" style="text-align:center;">从上传到决策，全自动流转</h2>
+    <p class="section-desc" style="text-align:center;margin:0 auto 32px;">一张图看懂 SmartHire 的工作流程</p>
+    <div class="workflow">
+      <span class="workflow-step">📋 创建 JD</span>
+      <span class="workflow-arrow">→</span>
+      <span class="workflow-step">📤 上传简历</span>
+      <span class="workflow-arrow">→</span>
+      <span class="workflow-step">🤖 AI 解析</span>
+      <span class="workflow-arrow">→</span>
+      <span class="workflow-step">🧠 AI 评分</span>
+      <span class="workflow-arrow">→</span>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span class="workflow-step pass">⭐ 待筛选 (≥60分)</span>
+        <span class="workflow-or">or</span>
+        <span class="workflow-step fail">🗑️ 淘汰 (&lt;60分)</span>
+      </div>
+      <span class="workflow-arrow">→</span>
+      <span class="workflow-step">👨‍💼 HR 最终决策</span>
     </div>
   </div>
-</section>
+</div>
 
-<!-- 系统架构 -->
-<section>
-  <h2 class="section-title">🏗 系统架构</h2>
-  <div class="arch-box">┌──────────────────────────────────────────────────────────────────┐
-│                        用户浏览器                               │
-│       React 18 + TypeScript + Ant Design 5 + Vite 5            │
-│     ┌─────────┐  ┌───────────┐  ┌──────────┐  ┌────────────┐ │
-│     │ 数据看板  │  │  JD管理   │  │ 简历管理   │  │  批量上传   │ │
-│     └─────────┘  └───────────┘  └─────┬────┘  └────────────┘ │
-│                    ┌──────────────────▼──────────┐             │
-│                    │   Axios HTTP 客户端           │             │
-│                    └──────────────────┬──────────┘             │
-└───────────────────────────────────────┼───────────────────────┘
-                                        │
-                               HTTP REST API
-                            localhost:8000/api/*
-                                        │
-┌───────────────────────────────────────┼───────────────────────┐
-│                      FastAPI 后端     │                       │
-│  ┌────────────────────────────────────▼─────────────────┐    │
-│  │               FastAPI Application                     │    │
-│  │  ┌──────────────┐  ┌──────────────┐  ┌────────────┐ │    │
-│  │  │ /api/resumes │  │  /api/jds    │  │/api/analyze│ │    │
-│  │  │ 简历 CRUD    │  │  JD CRUD     │  │ AI 评分    │ │    │
-│  │  └──────┬───────┘  └──────┬───────┘  └──────┬─────┘ │    │
-│  │         └────────┬────────┘─────────────────┘        │    │
-│  │                  ▼                                    │    │
-│  │  ┌────────────────────────────────────────┐           │    │
-│  │  │        SQLAlchemy ORM 2.0              │           │    │
-│  │  │  ┌──────────────────┐  ┌────────────┐  │           │    │
-│  │  │  │  job_descriptions│  │  resumes   │  │           │    │
-│  │  │  └──────────────────┘  └─────┬──────┘  │           │    │
-│  │  │  ┌───────────────────────────▼──────┐  │           │    │
-│  │  │  │     resume_scores                │  │           │    │
-│  │  │  │  (多对多: resume × jd)            │  │           │    │
-│  │  │  └──────────────────────────────────┘  │           │    │
-│  │  └────────────────────────────────────────┘           │    │
-│  │                        │                               │    │
-│  │         ┌──────────────▼──────────────┐                │    │
-│  │         │        SQLite                │                │    │
-│  │         └─────────────────────────────┘                │    │
-│  │                                                        │    │
-│  │         ┌──────────────────────────────┐               │    │
-│  │         │   Hermes Agent (subprocess)  │               │    │
-│  │         │   hermes chat -q "prompt"    │               │    │
-│  │         │   └→ JSON 响应              │               │    │
-│  │         └──────────────────────────────┘               │    │
-│  └────────────────────────────────────────────────────────┘    │
-└───────────────────────────────────────────────────────────────┘</div>
-</section>
+<!-- 界面预览 -->
+<div class="section" id="mockup">
+  <div class="section-label">🖥️ 界面预览</div>
+  <h2 class="section-title">看看实际用起来什么样</h2>
+  <p class="section-desc">以下是 SmartHire 核心页面的真实界面模拟，所有数据均为演示数据。</p>
 
-<!-- 评分流程 -->
-<section>
-  <h2 class="section-title">🎯 AI 评分流程</h2>
-  <div class="flow">
-    <span class="flow-step">📋 创建 JD</span>
-    <span class="flow-arrow">→</span>
-    <span class="flow-step">📤 上传简历</span>
-    <span class="flow-arrow">→</span>
-    <span class="flow-step">🤖 AI 解析</span>
-    <span class="flow-arrow">→</span>
-    <span class="flow-step">🧠 四维度评分</span>
-    <span class="flow-arrow">→</span>
-    <span class="flow-step" style="border-color:var(--green);">⭐ ≥60 待筛选</span>
-    <span class="flow-arrow">or</span>
-    <span class="flow-step" style="border-color:var(--red);">🗑️ &lt;60 淘汰库</span>
-    <span class="flow-arrow">→</span>
-    <span class="flow-step">👨‍💼 HR 决策</span>
+  <!-- Dashboard -->
+  <h3 style="font-size:1.1rem;margin-bottom:12px;display:flex;align-items:center;gap:8px;">📊 数据看板 — 招聘进度总览</h3>
+  <div class="mockup-wrap" style="margin-bottom:32px;">
+    <div class="mockup-header">
+      <div class="mockup-dot r"></div>
+      <div class="mockup-dot y"></div>
+      <div class="mockup-dot g"></div>
+      <div class="mockup-title">SmartHire — 数据看板</div>
+    </div>
+    <div class="mockup-body">
+      <div class="mockup-sidebar">
+        <div class="mockup-menu-item active">📊 数据看板</div>
+        <div class="mockup-menu-item">📄 全部简历</div>
+        <div class="mockup-menu-item">⭐ 待筛选 <span class="badge green">8</span></div>
+        <div class="mockup-menu-item">🗑️ 淘汰库 <span class="badge">12</span></div>
+        <div class="mockup-menu-item">📋 JD 管理</div>
+        <div class="mockup-menu-item">📤 批量上传</div>
+      </div>
+      <div class="mockup-main">
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="num">45</div>
+            <div class="label">📄 简历总数</div>
+            <div class="trend up">↑ 较上周 +12</div>
+          </div>
+          <div class="stat-card">
+            <div class="num">8</div>
+            <div class="label">⭐ 待筛选 (≥60)</div>
+            <div class="trend up">↑ 待处理</div>
+          </div>
+          <div class="stat-card">
+            <div class="num">5</div>
+            <div class="label">👨‍💼 初步通过</div>
+            <div class="trend up">↑ 已标记</div>
+          </div>
+          <div class="stat-card">
+            <div class="num" style="color:#16a34a;">72.5</div>
+            <div class="label">📊 平均评分</div>
+            <div class="trend up">↑ 高于阈值</div>
+          </div>
+        </div>
+        <div style="font-size:0.82rem;color:#64748b;margin-bottom:8px;">各状态分布</div>
+        <div class="bar" style="margin-bottom:12px;">
+          <div class="bar-seg" style="width:20%;background:#f59e0b;"></div>
+          <div class="bar-seg" style="width:18%;background:#3b82f6;"></div>
+          <div class="bar-seg" style="width:11%;background:#22c55e;"></div>
+          <div class="bar-seg" style="width:27%;background:#ef4444;"></div>
+          <div class="bar-seg" style="width:24%;background:#e2e8f0;"></div>
+        </div>
+        <div style="display:flex;gap:16px;font-size:0.78rem;">
+          <span>🟡 待处理 20%</span>
+          <span>🔵 已查看 18%</span>
+          <span>🟢 初筛通过 11%</span>
+          <span>🔴 淘汰 27%</span>
+          <span>⚪ 未评分 24%</span>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="arch-box" style="margin-top:16px;font-size:0.85rem;line-height:1.8;">
-评分维度权重：
-  ┌─────────────────┬──────┬──────────────────────────┐
-  │ 维度            │ 权重  │ 说明                     │
-  ├─────────────────┼──────┼──────────────────────────┤
-  │ 技能匹配度       │ 40%  │ 候选人技能与 JD 的匹配度  │
-  │ 经验匹配度       │ 30%  │ 工作经验与要求契合度      │
-  │ 教育背景匹配度   │ 15%  │ 教育背景符合程度          │
-  │ 综合契合度       │ 15%  │ 整体素质与职位匹配度      │
-  └─────────────────┴──────┴──────────────────────────┘
-
-  <span class="hl">总分</span> = 技能 × 40% + 经验 × 30% + 教育 × 15% + 综合 × 15%</div>
-</section>
-
-<!-- API 接口 -->
-<section>
-  <h2 class="section-title">🔌 API 接口一览</h2>
-  <div style="overflow-x:auto;">
-    <table class="api-table">
-      <thead><tr><th>方法</th><th>路径</th><th>功能</th></tr></thead>
-      <tbody>
-        <tr><td><span class="method post">POST</span></td><td>/api/resumes</td><td>上传单份简历</td></tr>
-        <tr><td><span class="method post">POST</span></td><td>/api/resumes/batch</td><td>批量上传简历</td></tr>
-        <tr><td><span class="method get">GET</span></td><td>/api/resumes</td><td>简历列表（搜索/筛选/分页）</td></tr>
-        <tr><td><span class="method get">GET</span></td><td>/api/resumes/{id}</td><td>简历详情</td></tr>
-        <tr><td><span class="method patch">PATCH</span></td><td>/api/resumes/{id}/status</td><td>更新简历状态+备注</td></tr>
-        <tr><td><span class="method delete">DELETE</span></td><td>/api/resumes/{id}</td><td>删除简历</td></tr>
-        <tr><td><span class="method post">POST</span></td><td>/api/jds</td><td>创建 JD</td></tr>
-        <tr><td><span class="method get">GET</span></td><td>/api/jds</td><td>JD 列表</td></tr>
-        <tr><td><span class="method get">GET</span></td><td>/api/jds/{id}</td><td>JD 详情</td></tr>
-        <tr><td><span class="method put">PUT</span></td><td>/api/jds/{id}</td><td>更新 JD</td></tr>
-        <tr><td><span class="method delete">DELETE</span></td><td>/api/jds/{id}</td><td>删除 JD</td></tr>
-        <tr><td><span class="method post">POST</span></td><td>/api/analyze/score</td><td>AI 评分（单份）</td></tr>
-        <tr><td><span class="method post">POST</span></td><td>/api/analyze/score-batch</td><td>批量 AI 评分</td></tr>
-        <tr><td><span class="method get">GET</span></td><td>/api/analyze/scores/{id}</td><td>评分历史</td></tr>
-        <tr><td><span class="method get">GET</span></td><td>/api/health</td><td>健康检查</td></tr>
-        <tr><td><span class="method get">GET</span></td><td>/api/stats</td><td>仪表盘统计</td></tr>
-      </tbody>
-    </table>
+  <!-- JD Management -->
+  <h3 style="font-size:1.1rem;margin:32px 0 12px;display:flex;align-items:center;gap:8px;">📋 JD 管理 — 职位描述管理</h3>
+  <div class="mockup-wrap" style="margin-bottom:32px;">
+    <div class="mockup-header">
+      <div class="mockup-dot r"></div>
+      <div class="mockup-dot y"></div>
+      <div class="mockup-dot g"></div>
+      <div class="mockup-title">SmartHire — JD 管理</div>
+    </div>
+    <div class="mockup-body">
+      <div class="mockup-sidebar">
+        <div class="mockup-menu-item">📊 数据看板</div>
+        <div class="mockup-menu-item">📄 全部简历</div>
+        <div class="mockup-menu-item">⭐ 待筛选</div>
+        <div class="mockup-menu-item">🗑️ 淘汰库</div>
+        <div class="mockup-menu-item active">📋 JD 管理</div>
+        <div class="mockup-menu-item">📤 批量上传</div>
+      </div>
+      <div class="mockup-main">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div style="font-size:0.9rem;font-weight:600;">职位列表 <span style="font-weight:400;color:#94a3b8;font-size:0.8rem;">共 3 个</span></div>
+          <div class="btn-ghost">＋ 新建 JD</div>
+        </div>
+        <div class="jd-card">
+          <div>
+            <div class="title">高级 Python 后端工程师</div>
+            <div class="meta">技术部 · 北京 · 2025-01-15</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="font-size:0.78rem;color:#64748b;">已启用</div>
+            <div class="switch"></div>
+          </div>
+        </div>
+        <div class="jd-card">
+          <div>
+            <div class="title">前端开发工程师</div>
+            <div class="meta">技术部 · 上海 · 2025-01-10</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="font-size:0.78rem;color:#64748b;">已启用</div>
+            <div class="switch"></div>
+          </div>
+        </div>
+        <div class="jd-card" style="opacity:0.6;">
+          <div>
+            <div class="title">产品经理</div>
+            <div class="meta">产品部 · 深圳 · 2024-12-20</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="font-size:0.78rem;color:#64748b;">已停用</div>
+            <div class="switch" style="background:#cbd5e1;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-  <p style="color:var(--muted);font-size:0.8rem;margin-top:8px;">Swagger UI: http://localhost:8000/docs</p>
-</section>
 
-<!-- 快速开始 -->
-<section>
-  <h2 class="section-title">🚀 快速开始</h2>
+  <!-- Resume List + Scoring -->
+  <h3 style="font-size:1.1rem;margin:32px 0 12px;display:flex;align-items:center;gap:8px;">⭐ 简历列表 & AI 评分 — 核心功能</h3>
+  <div class="mockup-wrap" style="margin-bottom:32px;">
+    <div class="mockup-header">
+      <div class="mockup-dot r"></div>
+      <div class="mockup-dot y"></div>
+      <div class="mockup-g g"></div>
+      <div class="mockup-title">SmartHire — 待筛选</div>
+    </div>
+    <div class="mockup-body">
+      <div class="mockup-sidebar">
+        <div class="mockup-menu-item">📊 数据看板</div>
+        <div class="mockup-menu-item">📄 全部简历</div>
+        <div class="mockup-menu-item active">⭐ 待筛选 <span class="badge green">8</span></div>
+        <div class="mockup-menu-item">🗑️ 淘汰库 <span class="badge">12</span></div>
+        <div class="mockup-menu-item">📋 JD 管理</div>
+        <div class="mockup-menu-item">📤 批量上传</div>
+      </div>
+      <div class="mockup-main">
+        <div class="mock-tabs">
+          <div class="mock-tab">📄 全部</div>
+          <div class="mock-tab active">⭐ 待筛选 <span class="count">(≥60 分)</span></div>
+          <div class="mock-tab">🗑️ 淘汰库 <span class="count">(&lt;60 分)</span></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:12px;">
+          <div class="btn-ghost" style="border-color:#3b82f6;color:#3b82f6;">☑ 已选 3 份</div>
+          <div class="btn-ghost" style="background:#3b82f6;color:#fff;border-color:#3b82f6;font-weight:600;">🤖 对选中的 3 份简历 AI 评分</div>
+          <div style="margin-left:auto;display:flex;gap:4px;">
+            <div class="btn-ghost">🔍 搜索</div>
+            <div class="btn-ghost">⬇ 排序</div>
+          </div>
+        </div>
+        <table class="mock-table">
+          <thead>
+            <tr><th style="width:32px;"><input type="checkbox" style="accent-color:#3b82f6;" checked></th><th>候选人</th><th>技能</th><th>经验</th><th>评分</th><th>状态</th><th>操作</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="checkbox" style="accent-color:#3b82f6;" checked></td>
+              <td class="name">张明</td>
+              <td><span class="skill">Python</span><span class="skill">FastAPI</span><span class="skill">SQL</span></td>
+              <td>5 年</td>
+              <td><span class="score-pill high">88</span></td>
+              <td><span class="status-tag pending">待处理</span></td>
+              <td style="font-size:0.75rem;color:#3b82f6;">查看</td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" style="accent-color:#3b82f6;" checked></td>
+              <td class="name">李芳</td>
+              <td><span class="skill">Java</span><span class="skill">Spring</span><span class="skill">Redis</span></td>
+              <td>7 年</td>
+              <td><span class="score-pill high">82</span></td>
+              <td><span class="status-tag shortlisted">已通过</span></td>
+              <td style="font-size:0.75rem;color:#3b82f6;">查看</td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" style="accent-color:#3b82f6;" checked></td>
+              <td class="name">王浩</td>
+              <td><span class="skill">React</span><span class="skill">TypeScript</span><span class="skill">Node</span></td>
+              <td>3 年</td>
+              <td><span class="score-pill high">76</span></td>
+              <td><span class="status-tag pending">待处理</span></td>
+              <td style="font-size:0.75rem;color:#3b82f6;">查看</td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td class="name">赵雪</td>
+              <td><span class="skill">Python</span><span class="skill">TensorFlow</span></td>
+              <td>4 年</td>
+              <td><span class="score-pill mid">65</span></td>
+              <td><span class="status-tag pending">待处理</span></td>
+              <td style="font-size:0.75rem;color:#3b82f6;">查看</td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td class="name">陈龙</td>
+              <td><span class="skill">Vue</span><span class="skill">CSS</span><span class="skill">Webpack</span></td>
+              <td>2 年</td>
+              <td><span class="score-pill low">45</span></td>
+              <td><span class="status-tag rejected">已淘汰</span></td>
+              <td style="font-size:0.75rem;color:#3b82f6;">查看</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
-  <p style="margin-bottom:8px;color:var(--muted);font-size:0.9rem;">前提条件：Python 3.10+ / Node.js 18+ / <a href="https://hermes-agent.nousresearch.com" style="color:var(--accent);" target="_blank">Hermes Agent</a></p>
+  <!-- Score Detail -->
+  <h3 style="font-size:1.1rem;margin:32px 0 12px;display:flex;align-items:center;gap:8px;">🧠 AI 评分详情 — 四维度可解释</h3>
+  <div class="mockup-wrap" style="margin-bottom:32px;">
+    <div class="mockup-header">
+      <div class="mockup-dot r"></div>
+      <div class="mockup-dot y"></div>
+      <div class="mockup-dot g"></div>
+      <div class="mockup-title">SmartHire — AI 评分详情 · 张明</div>
+    </div>
+    <div class="mockup-body">
+      <div class="mockup-sidebar">
+        <div class="mockup-menu-item">📊 数据看板</div>
+        <div class="mockup-menu-item active">📄 全部简历</div>
+        <div class="mockup-menu-item">⭐ 待筛选</div>
+        <div class="mockup-menu-item">🗑️ 淘汰库</div>
+        <div class="mockup-menu-item">📋 JD 管理</div>
+        <div class="mockup-menu-item">📤 批量上传</div>
+      </div>
+      <div class="mockup-main" style="padding:20px;">
+        <div style="display:flex;gap:24px;align-items:center;margin-bottom:16px;">
+          <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#8b5cf6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.5rem;font-weight:800;">88</div>
+          <div>
+            <div style="font-size:1.1rem;font-weight:700;">张明</div>
+            <div style="font-size:0.82rem;color:#64748b;margin-top:2px;">对「高级 Python 后端工程师」的综合评分</div>
+            <div style="font-size:0.82rem;color:#16a34a;margin-top:2px;">✅ 技能高度匹配，后端经验丰富，推荐进入面试环节</div>
+          </div>
+        </div>
+        <div class="score-detail-grid">
+          <div class="score-detail-item">
+            <div class="dim-label">💻 技能匹配度</div>
+            <div class="dim-score" style="color:#16a34a;">92</div>
+            <div class="dim-reason">Python/FastAPI/SQL 完全匹配</div>
+          </div>
+          <div class="score-detail-item">
+            <div class="dim-label">💼 经验匹配度</div>
+            <div class="dim-score" style="color:#16a34a;">85</div>
+            <div class="dim-reason">5年后端经验，3年分布式系统</div>
+          </div>
+          <div class="score-detail-item">
+            <div class="dim-label">🎓 教育背景</div>
+            <div class="dim-score" style="color:#f59e0b;">78</div>
+            <div class="dim-reason">计算机本科，211院校</div>
+          </div>
+          <div class="score-detail-item">
+            <div class="dim-label">🎯 综合契合度</div>
+            <div class="dim-score" style="color:#16a34a;">86</div>
+            <div class="dim-reason">职业规划与岗位匹配度高</div>
+          </div>
+        </div>
+        <div style="font-size:0.82rem;color:#64748b;background:#f8fafc;padding:12px;border-radius:8px;border:1px solid #e2e8f0;">
+          <strong>📝 综合评价：</strong>候选人具备扎实的后端开发功底，5年Python经验，熟练掌握FastAPI和SQL，曾主导过日活百万级别的API重构项目。技术栈与JD要求高度契合，建议进入下一轮技术面。不足：缺少云原生(K8s)相关经验，可作为面试考察重点。
+        </div>
+      </div>
+    </div>
+  </div>
 
-  <div class="code-block">
-<span class="cmt"># 1. 克隆项目</span>
-<span class="kwd">git clone</span> https://github.com/cj38973983423/SmartHire.git
-<span class="kwd">cd</span> SmartHire
+  <!-- Upload -->
+  <h3 style="font-size:1.1rem;margin:32px 0 12px;display:flex;align-items:center;gap:8px;">📤 批量上传 — 拖拽即可</h3>
+  <div class="mockup-wrap">
+    <div class="mockup-header">
+      <div class="mockup-dot r"></div>
+      <div class="mockup-dot y"></div>
+      <div class="mockup-dot g"></div>
+      <div class="mockup-title">SmartHire — 批量上传简历</div>
+    </div>
+    <div class="mockup-body">
+      <div class="mockup-sidebar">
+        <div class="mockup-menu-item">📊 数据看板</div>
+        <div class="mockup-menu-item">📄 全部简历</div>
+        <div class="mockup-menu-item">⭐ 待筛选</div>
+        <div class="mockup-menu-item">🗑️ 淘汰库</div>
+        <div class="mockup-menu-item">📋 JD 管理</div>
+        <div class="mockup-menu-item active">📤 批量上传</div>
+      </div>
+      <div class="mockup-main">
+        <div class="upload-area">
+          <div class="icon">📁</div>
+          <p>拖拽 PDF 或 DOCX 文件到此处，或点击下方按钮选择</p>
+          <div class="btn-upload">📂 选择多个文件</div>
+          <div class="btn-upload" style="background:#f8fafc;color:#64748b;border:1px solid #e2e8f0;margin-left:8px;">📂 选择文件夹</div>
+          <div class="upload-files">
+            <span class="upload-file"><span class="check">✓</span> 张三-高级工程师.pdf</span>
+            <span class="upload-file"><span class="check">✓</span> 李四-简历.docx</span>
+            <span class="upload-file"><span class="check">✓</span> 王五-个人简历.pdf</span>
+            <span class="upload-file" style="border:1px dashed #93c5fd;color:#3b82f6;">+ 已选 5 个文件</span>
+          </div>
+        </div>
+        <div style="font-size:0.82rem;color:#64748b;margin-top:8px;">✅ 支持格式：PDF、DOCX · 上传后自动解析姓名、技能、经验等结构化信息</div>
+      </div>
+    </div>
+  </div>
+</div>
 
-<span class="cmt"># 2. 启动后端</span>
-<span class="kwd">cd</span> backend
-python3 -m <span class="var">venv</span> .venv
-<span class="kwd">source</span> .venv/bin/activate
-pip <span class="kwd">install</span> -r requirements.txt
-uvicorn app.main:app <span class="var">--reload</span> <span class="var">--port</span> 8000
-
-<span class="cmt"># 3. 新开终端，启动前端</span>
-<span class="kwd">cd</span> frontend
-npm <span class="kwd">install</span>
-npm <span class="kwd">run</span> dev
-
-<span class="cmt"># 4. 浏览器打开</span>
-<span class="str">http://localhost:5173</span></div>
-</section>
-
-<!-- 项目结构 -->
-<section>
-  <h2 class="section-title">📁 项目结构</h2>
-  <div class="arch-box" style="font-size:0.82rem;line-height:1.7;">SmartHire/
-├── <span class="hl">README.md</span>              # 项目说明
-├── <span class="hl">RESUME-PROJECT.md</span>      # 简历项目描述文档
-├── <span class="hl">TUTORIAL.md</span>            # 零基础教程
-├── <span class="hl">SmartHire-介绍.html</span>    # 👈 你正在看的这个页面
-├── <span class="hl2">.github/workflows/ci.yml</span>  # CI 自动构建
-│
-├── <span class="hl3">backend/</span>
-│   ├── requirements.txt
-│   └── app/
-│       ├── main.py              # FastAPI 入口
-│       ├── models.py            # 3 张 ORM 表
-│       ├── schemas.py           # 请求/响应模型
-│       ├── routers/             # 3 组路由 (16+ 接口)
-│       └── services/            # Hermes 集成 + 文件存储
-│
-├── <span class="hl3">frontend/</span>
-│   └── src/
-│       ├── api/index.ts         # Axios 客户端
-│       ├── App.tsx              # 路由 + 侧边栏
-│       └── pages/               # 6 个页面组件
-│
-├── <span class="hl3">docs/</span>                 # 架构文档
-└── <span class="hl3">uploads/</span>               # 简历文件存储</div>
-</section>
-
+<!-- CTA -->
+<div style="background:linear-gradient(135deg,#0f172a,#1e293b);text-align:center;padding:64px 24px;">
+  <h2 style="font-size:2rem;font-weight:800;color:#fff;margin-bottom:12px;">准备试试了吗？🚀</h2>
+  <p style="color:#94a3b8;margin-bottom:24px;">克隆仓库，一行命令启动，立即体验 AI 招聘的威力</p>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+    <a href="https://github.com/cj38973983423/SmartHire" class="btn-primary" target="_blank">克隆到本地 →</a>
+    <a href="https://github.com/cj38973983423/SmartHire/blob/main/TUTORIAL.md" class="btn-outline-light" target="_blank">📖 查看教程</a>
+  </div>
 </div>
 
 <div class="footer">
-  <p>📋 SmartHire · 基于 MIT 协议开源</p>
+  <p><strong>SmartHire</strong> — AI 智能招聘助手 · 基于 MIT 协议开源</p>
   <p style="margin-top:4px;">
-    <a href="https://github.com/cj38973983423/SmartHire" style="color:var(--accent);text-decoration:none;" target="_blank">GitHub</a>
+    <a href="https://github.com/cj38973983423/SmartHire" target="_blank">GitHub 仓库</a>
     ·
-    <a href="https://github.com/cj38973983423/SmartHire/blob/main/RESUME-PROJECT.md" style="color:var(--accent);text-decoration:none;" target="_blank">简历项目描述</a>
+    <a href="https://github.com/cj38973983423/SmartHire/blob/main/RESUME-PROJECT.md" target="_blank">简历项目描述</a>
     ·
-    <a href="https://github.com/cj38973983423/SmartHire/blob/main/TUTORIAL.md" style="color:var(--accent);text-decoration:none;" target="_blank">零基础教程</a>
+    <a href="https://github.com/cj38973983423/SmartHire/blob/main/TUTORIAL.md" target="_blank">零基础教程</a>
   </p>
 </div>
 
